@@ -1,27 +1,27 @@
 package com.onlinebetting.service.impl;
 
 import com.onlinebetting.service.SessionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import com.onlinebetting.web.annotation.Autowired;
+import com.onlinebetting.web.annotation.Service;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Component
-public class SessionCommandLineRunner implements CommandLineRunner {
+@Service(name = "sessionCommandLineRunner")
+public class SessionCommandLineRunner implements Observer {
 
-    @Autowired
+    @Autowired(name = "sessionService")
     private SessionService sessionService;
 
     @Override
-    public void run(String... args) {
-        System.out.println("remove  expired session task started！");
-
+    public void update(Observable o, Object arg) {
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutorService.scheduleAtFixedRate(() -> sessionService.cleanUpInvalidSession(), 1, 1, TimeUnit.MINUTES);
-
+        System.out.println("remove  expired session task started！");
     }
+
 
 }

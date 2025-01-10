@@ -5,17 +5,17 @@ import com.onlinebetting.pojo.vo.BetOffer;
 import com.onlinebetting.pojo.vo.BetOfferDetail;
 import com.onlinebetting.service.SessionService;
 import com.onlinebetting.service.StakeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.onlinebetting.web.annotation.Autowired;
+import com.onlinebetting.web.annotation.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@Service
+@Service(name = "sessionServiceImpl")
 public class StakeServiceImpl implements StakeService {
 
-    @Autowired
+    @Autowired(name = "sessionService")
     private SessionService sessionService;
 
     private final Map<Long, BetOffer> betOffers = new ConcurrentHashMap<>();

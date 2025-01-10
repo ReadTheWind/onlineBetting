@@ -3,7 +3,7 @@ package com.onlinebetting.service.impl;
 import com.onlinebetting.pojo.vo.Customers;
 import com.onlinebetting.pojo.vo.Session;
 import com.onlinebetting.service.SessionService;
-import org.springframework.stereotype.Service;
+import com.onlinebetting.web.annotation.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+@Service(name = "sessionServiceImpl")
 public class SessionServiceImpl implements SessionService {
 
     private final Map<Long, String> sessions = new ConcurrentHashMap<>();
@@ -65,7 +65,7 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public long validateSession(String sessionKey) {
         Session session = Session.parseSession(sessionKey);
-        if (session.isExpired()) {
+        if (!sessions.containsKey(session.getCustomerId()) || session.isExpired()) {
             throw new IllegalArgumentException("the current session is expired...");
         }
         return session.getCustomerId();

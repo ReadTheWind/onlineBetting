@@ -1,23 +1,18 @@
 package com.onlinebetting.controller;
 
 import com.onlinebetting.service.SessionService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import com.onlinebetting.web.enums.MethodType;
+import com.onlinebetting.web.annotation.*;
 
-@RestController
+@WebController(name = "sessionController")
 public class SessionController {
 
 
+    @Autowired(name = "sessionService")
+    public SessionService sessionService;
 
-    private final SessionService sessionService;
-
-    public SessionController(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
-
-    @GetMapping("/{customerId}/session")
-    public String getSession(@PathVariable("customerId") long customerId) {
+    @RequestMapping(path = "/{customerId}/session", method = MethodType.GET)
+    public String getSession(@PathParameter(name = "customerId") long customerId) {
         return sessionService.getSession(customerId);
     }
 

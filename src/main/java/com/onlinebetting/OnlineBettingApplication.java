@@ -1,13 +1,12 @@
 package com.onlinebetting;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.onlinebetting.web.WebApplicationContext;
 
-@SpringBootApplication
+import java.io.IOException;
+
 public class OnlineBettingApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(OnlineBettingApplication.class, args);
+    public static void main(String[] args) throws IOException, IllegalAccessException {
+        WebApplicationContext.start(OnlineBettingApplication.class, args);
     }
-
 }

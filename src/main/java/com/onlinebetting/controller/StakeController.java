@@ -1,26 +1,24 @@
 package com.onlinebetting.controller;
 
 import com.onlinebetting.service.StakeService;
-import org.springframework.web.bind.annotation.*;
+import com.onlinebetting.web.enums.MethodType;
+import com.onlinebetting.web.annotation.*;
 
-@RestController
+@WebController(name = "stakeController")
 public class StakeController {
 
+    @Autowired(name = "stakeService")
     private StakeService stakeService;
 
-    public StakeController(StakeService stakeService) {
-        this.stakeService = stakeService;
-    }
-
-    @PostMapping("/{betOfferId}/stake")
-    public void offerStake(@PathVariable("betOfferId") long betOfferId,
-                           @RequestParam(value = "sessionKey") String sessionKey,
+    @RequestMapping(path = "/{betOfferId}/stake", method = MethodType.POST)
+    public void offerStake(@PathParameter(name = "betOfferId") long betOfferId,
+                           @RequestParam(name = "sessionKey") String sessionKey,
                            @RequestBody double amount) throws Exception {
         stakeService.offerStake(betOfferId, sessionKey, amount);
     }
 
-    @GetMapping("/{betOfferId}/highStakes")
-    public String highStakes(@PathVariable("betOfferId") long betOfferId) {
+    @RequestMapping(path = "/{betOfferId}/highStakes", method = MethodType.GET)
+    public String highStakes(@PathParameter(name = "betOfferId") long betOfferId) {
         return stakeService.highStakes(betOfferId);
     }
 
