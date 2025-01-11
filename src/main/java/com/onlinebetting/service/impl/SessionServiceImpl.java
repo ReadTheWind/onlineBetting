@@ -23,7 +23,7 @@ public class SessionServiceImpl implements SessionService {
 
         LocalDateTime time = LocalDateTime.now();
 
-        String session = sessions.computeIfPresent(customerId, (customer, sessionKey) -> createSessionIfPresent(customer, sessionKey, time));
+        String session = sessions.computeIfPresent(customerId, (customer, sessionKey) -> checkSessionIfPresent(customer, sessionKey, time));
 
         if (null != session && session.length() > 0) {
             return session;
@@ -36,7 +36,7 @@ public class SessionServiceImpl implements SessionService {
         return generateSession(customerId, time);
     }
 
-    private String createSessionIfPresent(long customerId, String sessionKey, LocalDateTime time) {
+    private String checkSessionIfPresent(long customerId, String sessionKey, LocalDateTime time) {
         Session session = Session.parseSession(sessionKey);
         if (session.isExpired()) {
             return generateSession(customerId, time);
@@ -65,10 +65,14 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public long validateSession(String sessionKey) {
         Session session = Session.parseSession(sessionKey);
-        if (!sessions.containsKey(session.getCustomerId()) || session.isExpired()) {
+        if (!isValidSession(sessionKey, session) || session.isExpired()) {
             throw new IllegalArgumentException("the current session is expired...");
         }
         return session.getCustomerId();
+    }
+
+    private boolean isValidSession(String sessionKey, Session session) {
+        return sessions.containsKey(session.getCustomerId()) && sessions.get(session.getCustomerId()).equals(sessionKey);
     }
 
     @Override

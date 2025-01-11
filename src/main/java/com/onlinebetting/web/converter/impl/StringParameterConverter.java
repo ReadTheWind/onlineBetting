@@ -8,7 +8,7 @@ public class StringParameterConverter implements ParameterConverter {
 
     @Override
     public boolean isMatch(Parameter parameter) {
-        return parameter.getParameterizedType().getTypeName().equals("java.lang.String");
+        return parameter.getParameterizedType().getTypeName().equals(String.class.getName());
     }
 
     @Override

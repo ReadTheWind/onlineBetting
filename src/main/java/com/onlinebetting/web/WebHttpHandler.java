@@ -1,6 +1,8 @@
 package com.onlinebetting.web;
 
+import com.onlinebetting.web.constants.WebConstant;
 import com.onlinebetting.web.enums.MethodType;
+import com.onlinebetting.web.exception.PathMatchExecutorException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -18,24 +20,25 @@ public class WebHttpHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
 
         InputStream inputStream = exchange.getRequestBody();
-        String realPath = exchange.getRequestURI().getPath();
-        String parameters = exchange.getRequestURI().getQuery();
+        String requestPath = exchange.getRequestURI().getPath();
+        String requestParameters = exchange.getRequestURI().getQuery();
 
-        String requestBody = "";
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            requestBody = reader.readLine();
-        }
         MethodType methodType = MethodType.getMethodType(exchange.getRequestMethod());
-
         OutputStream httpResponse = exchange.getResponseBody();
-        try {
-            Object response = dispatcher.dispatch(realPath, parameters, requestBody, methodType);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String requestBody = reader.readLine();
+            Object response = dispatcher.dispatch(requestPath, requestParameters, requestBody, methodType);
 
-            exchange.sendResponseHeaders(200, 0);
-            httpResponse.write((null == response ? "" : response.toString()).getBytes());
+            exchange.sendResponseHeaders(WebConstant.SUCCESS_HTTP_STATUS_CODE, WebConstant.INT_ZERO);
+            httpResponse.write((null == response ? WebConstant.EMPTY_STRING : response.toString()).getBytes());
+        } catch (PathMatchExecutorException e) {
+            e.printStackTrace();
+
+            exchange.sendResponseHeaders(WebConstant.PATH_NOT_FOUND_HTTP_STATUS_CODE, WebConstant.INT_ZERO);
         } catch (Exception e) {
             e.printStackTrace();
-            exchange.sendResponseHeaders(500, 0);
+
+            exchange.sendResponseHeaders(WebConstant.ERROR_HTTP_STATUS_CODE, WebConstant.INT_ZERO);
             try {
                 httpResponse.write(e.getMessage().getBytes());
             } catch (IOException exception) {

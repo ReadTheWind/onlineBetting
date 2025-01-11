@@ -1,6 +1,7 @@
 package com.onlinebetting.pojo.vo;
 
 import com.onlinebetting.utils.AESUtil;
+import com.onlinebetting.web.constants.WebConstant;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -47,7 +48,7 @@ public class Session {
         Long createTimestamp = getTimestamp();
         LocalDateTime now = LocalDateTime.now();
         Long second = now.plusMinutes(-10).toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(now));
-        return createTimestamp.compareTo(second) <= 0;
+        return createTimestamp.compareTo(second) <= WebConstant.INT_ZERO;
     }
 
     public Long getCustomerId() {

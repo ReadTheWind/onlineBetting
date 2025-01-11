@@ -1,22 +1,62 @@
 package com.onlinebetting.web;
 
+import com.onlinebetting.web.annotation.RequestMapping;
+import com.onlinebetting.web.annotation.WebController;
+import com.onlinebetting.web.bean.BeanScanner;
 import com.onlinebetting.web.bean.WebExecutor;
+import com.onlinebetting.web.constants.WebConstant;
 import com.onlinebetting.web.enums.MethodType;
+import com.onlinebetting.web.exception.PathMatchExecutorException;
 
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Dispatcher {
 
-    private final Map<String, WebExecutor> executors;
+    public final Map<String, WebExecutor> executors = new ConcurrentHashMap<>();
 
-    public Dispatcher(Map<String, WebExecutor> executors) {
-        this.executors = executors;
+    public Dispatcher(List<Object> controllerBeans) {
+        handleMapping(controllerBeans);
     }
 
-    public Object dispatch(String realPath, String parameters, String requestBody, MethodType methodType) {
+    private void handleMapping(List<Object> controllerBeans) {
+        for (Object controllerBean : controllerBeans) {
+            handleControllerMapping(controllerBean);
+        }
+    }
 
-        WebExecutor executor = initWebExecutor(realPath, parameters, requestBody, methodType);
+    private void handleControllerMapping(Object controllerBean) {
+        Class<?> controllerClazz = controllerBean.getClass();
+        WebController webController = controllerClazz.getAnnotation(WebController.class);
+        validatePath(webController.path());
+        handleMethodMapping(controllerBean, webController.path());
+    }
+
+    private void handleMethodMapping(Object controllerBean, String path) {
+
+        Class<?> controllerClazz = controllerBean.getClass();
+        Set<Method> methods = BeanScanner.getAnnotatedMethods(controllerClazz, RequestMapping.class);
+        for (Method method : methods) {
+            RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+            validatePath(requestMapping.path());
+            buildExecutorByMethod(controllerClazz, path, requestMapping, method);
+        }
+    }
+
+    private void buildExecutorByMethod(Class<?> controllerClazz, String path, RequestMapping requestMapping, Method method) {
+        String fullPath = path + requestMapping.path();
+        WebExecutor executor = new WebExecutor(controllerClazz.getName(), path, requestMapping.path(), method, requestMapping.method());
+        executors.put(fullPath, executor);
+    }
+
+
+    public Object dispatch(String requestPath, String parameters, String requestBody, MethodType methodType) {
+
+        WebExecutor executor = initWebExecutor(requestPath, parameters, requestBody, methodType);
 
         return invoke(executor);
     }
@@ -25,50 +65,76 @@ public class Dispatcher {
         return executor.invoke();
     }
 
-    private WebExecutor initWebExecutor(String realPath, String parameters, String requestBody, MethodType methodType) {
+    private WebExecutor initWebExecutor(String requestPath, String parameters, String requestBody, MethodType methodType) {
 
-        WebExecutor executor = getWebExecutor(realPath, methodType);
+        WebExecutor executor = findWebExecutorByRequestPath(requestPath, methodType);
 
-        if (null == executor) {
-            throw new NullPointerException("could not match any server paths...");
-        }
+        if (null == executor) throw new PathMatchExecutorException();
 
-        processPathParameters(realPath, executor);
+        processPathParameters(requestPath, executor);
 
         processParameters(parameters, requestBody, executor);
 
         return executor;
     }
 
-    private WebExecutor getWebExecutor(String realPath, MethodType methodType) {
+    private WebExecutor findWebExecutorByRequestPath(String realPath, MethodType methodType) {
         Optional<Map.Entry<String, WebExecutor>> matchExecutor = executors.entrySet().stream().filter(i -> this.isMatch(i, realPath, methodType)).findFirst();
         return matchExecutor.map(Map.Entry::getValue).orElse(null);
     }
 
+
+    private void validatePath(String path) {
+        if (path != null && !path.equals(WebConstant.EMPTY_STRING) && !path.startsWith(WebConstant.SLASH))
+            throw new IllegalArgumentException("Path is illegal... Please start with '/'");
+    }
+
     private void processParameters(String parameters, String requestBody, WebExecutor executor) {
 
-        if (parameters == null || parameters.length() < 1) return;
+        if (isEmpty(parameters)) return;
 
-        if (parameters.contains("&")) {
-            String[] parameterArray = parameters.split("&");
-            for (String str : parameterArray) {
-                String[] parameter = str.split("=");
-                executor.setParameterValue(parameter[0], parameter[1]);
-            }
+        if (isMultipleParameter(parameters)) {
+            processMultipleParameter(parameters, executor);
         } else {
-            String[] parameter = parameters.split("=");
-            executor.setParameterValue(parameter[0], parameter[1]);
+            processSingleParameter(parameters, executor);
         }
         executor.setRequestBodyValue(requestBody);
     }
 
+    private boolean isEmpty(String parameters) {
+        return parameters == null || parameters.length() < 1;
+    }
+
+    private boolean isMultipleParameter(String parameters) {
+        return parameters.contains(WebConstant.AND_SIGN);
+    }
+
+    private void processSingleParameter(String parameters, WebExecutor executor) {
+        executor.setParameterValue(getSingleParameterKey(parameters), getSingleParameterValue(parameters));
+    }
+
+    private String getSingleParameterKey(String parameters) {
+        return parameters.substring(0, parameters.indexOf(WebConstant.EQUALS_SIGN));
+    }
+
+    private String getSingleParameterValue(String parameters) {
+        return parameters.substring(parameters.indexOf(WebConstant.EQUALS_SIGN) + 1);
+    }
+
+    private void processMultipleParameter(String parameters, WebExecutor executor) {
+        String[] parameterArray = parameters.split(WebConstant.AND_SIGN);
+        for (String parameter : parameterArray) {
+            processSingleParameter(parameter, executor);
+        }
+    }
+
     private void processPathParameters(String realPath, WebExecutor executor) {
 
-        String[] serverPathItem = executor.getMethodPath().split("/");
-        String[] clientPathItem = realPath.split("/");
+        String[] serverPathItem = executor.getMethodPath().split(WebConstant.SLASH);
+        String[] clientPathItem = realPath.split(WebConstant.SLASH);
 
         for (int i = 1; i < serverPathItem.length; i++) {
-            if (serverPathItem[i].startsWith("{") && serverPathItem[i].endsWith("}")) {
+            if (serverPathItem[i].startsWith(WebConstant.OPEN_BRACE) && serverPathItem[i].endsWith(WebConstant.CLOSE_BRACE)) {
                 String pathParameterValue = clientPathItem[i];
                 String parameterName = serverPathItem[i].substring(1, serverPathItem[i].length() - 1);
                 executor.setPathParameterValue(parameterName, pathParameterValue);
@@ -80,8 +146,8 @@ public class Dispatcher {
 
         boolean isMatch = Boolean.TRUE;
 
-        String[] serverPathItem = entry.getKey().split("/");
-        String[] clientPathItem = realPath.split("/");
+        String[] serverPathItem = entry.getKey().split(WebConstant.SLASH);
+        String[] clientPathItem = realPath.split(WebConstant.SLASH);
 
         for (int i = 1; i < serverPathItem.length; i++) {
             if (!isPathRequest(serverPathItem[i]) && !serverPathItem[i].equals(clientPathItem[i])) {
@@ -98,7 +164,7 @@ public class Dispatcher {
     }
 
     private boolean isPathRequest(String serverPathItem) {
-        return serverPathItem.startsWith("{") && serverPathItem.endsWith("}");
+        return serverPathItem.startsWith(WebConstant.OPEN_BRACE) && serverPathItem.endsWith(WebConstant.CLOSE_BRACE);
     }
 
 }

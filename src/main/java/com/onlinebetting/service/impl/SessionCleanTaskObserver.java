@@ -10,8 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Service(name = "sessionCommandLineRunner")
-public class SessionCommandLineRunner implements Observer {
+@Service(name = "sessionCleanTaskObserver")
+public class SessionCleanTaskObserver implements Observer {
 
     @Autowired(name = "sessionService")
     private SessionService sessionService;

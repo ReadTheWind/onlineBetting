@@ -1,8 +1,11 @@
 package com.onlinebetting.controller;
 
 import com.onlinebetting.service.SessionService;
+import com.onlinebetting.web.annotation.Autowired;
+import com.onlinebetting.web.annotation.PathParameter;
+import com.onlinebetting.web.annotation.RequestMapping;
+import com.onlinebetting.web.annotation.WebController;
 import com.onlinebetting.web.enums.MethodType;
-import com.onlinebetting.web.annotation.*;
 
 @WebController(name = "sessionController")
 public class SessionController {

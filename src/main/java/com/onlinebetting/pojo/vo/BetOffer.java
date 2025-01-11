@@ -21,20 +21,37 @@ public class BetOffer {
     }
 
     public BetOffer add(BetOfferDetail betOfferDetail) {
-        Optional<BetOfferDetail> customerLogOpt = getBetOfferDetails().stream().filter(log -> betOfferDetail.getCustomerId().equals(log.getCustomerId())).findAny();
-        if (customerLogOpt.isPresent()) {
-            BetOfferDetail detail = customerLogOpt.get();
-            if (betOfferDetail.getStakeAmount() > detail.getStakeAmount()) {
-                this.betOfferDetails.remove(detail);
-                this.betOfferDetails.add(betOfferDetail);
-            }
-        } else {
-            this.betOfferDetails.add(betOfferDetail);
+        Optional<BetOfferDetail> customerPreviousBetOffer = findCustomerPreviousBetOffer(betOfferDetail);
+
+        if (invalidBetOffer(betOfferDetail, customerPreviousBetOffer.orElse(null))) {
+            return this;
         }
-        if (getBetOfferDetails().size() > Constant.MAX_NUMBER) {
-            getBetOfferDetails().pollLast();
-        }
+
+        customerPreviousBetOffer.ifPresent(previousOfferDetail -> this.betOfferDetails.remove(previousOfferDetail));
+
+        this.betOfferDetails.add(betOfferDetail);
+
+        doOverSizeCheck();
+
         return this;
+    }
+
+    private boolean invalidBetOffer(BetOfferDetail betOfferDetail, BetOfferDetail customerLastTimeBetOffer) {
+        return null != customerLastTimeBetOffer && betOfferDetail.getStakeAmount() < customerLastTimeBetOffer.getStakeAmount();
+    }
+
+    private Optional<BetOfferDetail> findCustomerPreviousBetOffer(BetOfferDetail betOfferDetail) {
+        return getBetOfferDetails()
+                .stream()
+                .filter(log -> betOfferDetail.getCustomerId().equals(log.getCustomerId()))
+                .findAny();
+    }
+
+    private void doOverSizeCheck() {
+        if (getBetOfferDetails().size() <= Constant.MAX_NUMBER) {
+            return;
+        }
+        getBetOfferDetails().pollLast();
     }
 
 

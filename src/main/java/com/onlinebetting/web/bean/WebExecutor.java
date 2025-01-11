@@ -1,11 +1,12 @@
 package com.onlinebetting.web.bean;
 
+import com.onlinebetting.web.ParameterConverterFactory;
 import com.onlinebetting.web.annotation.PathParameter;
 import com.onlinebetting.web.annotation.RequestBody;
 import com.onlinebetting.web.annotation.RequestParam;
-import com.onlinebetting.web.enums.MethodType;
+import com.onlinebetting.web.constants.WebConstant;
 import com.onlinebetting.web.converter.ParameterConverter;
-import com.onlinebetting.web.ParameterConverterFactory;
+import com.onlinebetting.web.enums.MethodType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,7 +45,9 @@ public class WebExecutor {
         try {
             Object controllerObject = SingletonBeanFactory.getBean(controllerName);
             return method.invoke(controllerObject, buildParameterArray());
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getTargetException());
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -75,17 +78,15 @@ public class WebExecutor {
         return converter.convert(parameterValue);
     }
 
-
     private void initializeParameters() {
         for (int i = 0; i < method.getParameterCount(); i++) {
-
             Parameter parameter = method.getParameters()[i];
             if (parameter.isAnnotationPresent(PathParameter.class)) {
                 PathParameter pathParameter = method.getParameters()[i].getAnnotation(PathParameter.class);
-                parameters.put(pathParameter.name(), "");
+                parameters.put(pathParameter.name(), WebConstant.EMPTY_STRING);
             } else if (parameter.isAnnotationPresent(RequestParam.class)) {
                 RequestParam requestParam = method.getParameters()[i].getAnnotation(RequestParam.class);
-                parameters.put(requestParam.name(), "");
+                parameters.put(requestParam.name(), WebConstant.EMPTY_STRING);
             } else if (parameter.isAnnotationPresent(RequestBody.class)) {
                 this.requestBodyName = method.getParameters()[i].getName();
             }

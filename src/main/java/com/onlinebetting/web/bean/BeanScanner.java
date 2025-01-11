@@ -2,12 +2,14 @@ package com.onlinebetting.web.bean;
 
 import com.onlinebetting.web.annotation.Service;
 import com.onlinebetting.web.annotation.WebController;
+import com.onlinebetting.web.constants.WebConstant;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,11 +30,11 @@ public class BeanScanner {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static Set<Field> getAnnotatedFields(Class<?> clazz, Class<?> fieldAnnotations) {
         Set<Field> fields = new HashSet<>();
         for (Field field : clazz.getDeclaredFields()) {
-            if(field.isAnnotationPresent((Class<? extends Annotation>) fieldAnnotations)) {
+            if (field.isAnnotationPresent((Class<? extends Annotation>) fieldAnnotations)) {
                 fields.add(field);
             }
         }
@@ -58,16 +60,17 @@ public class BeanScanner {
 
     private static Set<String> getAnnotatedClasses(String packageName, Class<?>... annotations) throws URISyntaxException, ClassNotFoundException {
 
-        File folder = new File(Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", "/")).toURI());
+        File folder = new File(getResourceURL(packageName).toURI());
         Set<String> beanNames = new HashSet<>();
         for (File file : folder.listFiles()) {
 
             if (isClassFile(file)) {
-                String className = packageName + '.' + file.getName().substring(0, file.getName().lastIndexOf("."));
+                String className = packageName + WebConstant.DOT + file.getName().substring(0, file.getName().lastIndexOf(WebConstant.DOT));
                 Class<?> clazz = Class.forName(className);
-
-                if (isClassAnnotated(clazz, annotations)) beanNames.add(className);
-            } else if(file.isDirectory()) {
+                if (isClassAnnotated(clazz, annotations)) {
+                    beanNames.add(className);
+                }
+            } else if (file.isDirectory()) {
                 String subordinatePackageName = packageName + "." + file.getName();
                 beanNames.addAll(getAnnotatedClasses(subordinatePackageName, annotations));
             }
@@ -75,14 +78,18 @@ public class BeanScanner {
         return beanNames;
     }
 
+    private static URL getResourceURL(String packageName) {
+        return Thread.currentThread().getContextClassLoader().getResource(packageName.replace(WebConstant.DOT, WebConstant.SLASH));
+    }
+
     private static boolean isClassAnnotated(Class<?> clazz, Class<?>... annotations) {
         for (Class<?> annotation : annotations) {
-            if(clazz.isAnnotationPresent((Class<? extends Annotation>) annotation)) return Boolean.TRUE;
+            if (clazz.isAnnotationPresent((Class<? extends Annotation>) annotation)) return Boolean.TRUE;
         }
         return Boolean.FALSE;
     }
 
     private static boolean isClassFile(File file) {
-        return file.isFile() && file.getName().endsWith(".class");
+        return file.isFile() && file.getName().endsWith(WebConstant.CLASS_SUFFIX);
     }
 }

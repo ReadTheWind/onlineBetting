@@ -3,15 +3,15 @@ package com.onlinebetting.web;
 import com.onlinebetting.web.converter.ParameterConverter;
 
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ParameterConverterFactory {
 
     private ParameterConverter defaultConverter;
 
-    private final List<ParameterConverter> parameterConverters = new CopyOnWriteArrayList<>();
+    private final List<ParameterConverter> parameterConverters = new ArrayList<>();
 
     public ParameterConverter getConverter(Parameter parameter) {
         for (ParameterConverter converter : parameterConverters) {

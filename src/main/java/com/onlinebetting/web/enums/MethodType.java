@@ -17,6 +17,6 @@ public enum MethodType {
                 return type;
             }
         }
-        throw new NullPointerException();
+        throw new IllegalArgumentException("could not find type value...");
     }
 }
