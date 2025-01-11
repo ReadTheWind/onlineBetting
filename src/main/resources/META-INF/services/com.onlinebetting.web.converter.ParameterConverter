@@ -1,0 +1,4 @@
+com.onlinebetting.web.converter.impl.IntParameterConverter
+com.onlinebetting.web.converter.impl.StringParameterConverter
+com.onlinebetting.web.converter.impl.LongParameterConverter
+com.onlinebetting.web.converter.impl.DoubleParameterConverter

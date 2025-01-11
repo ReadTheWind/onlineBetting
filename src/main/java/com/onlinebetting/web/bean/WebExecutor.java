@@ -4,6 +4,8 @@ import com.onlinebetting.web.annotation.PathParameter;
 import com.onlinebetting.web.annotation.RequestBody;
 import com.onlinebetting.web.annotation.RequestParam;
 import com.onlinebetting.web.enums.MethodType;
+import com.onlinebetting.web.converter.ParameterConverter;
+import com.onlinebetting.web.ParameterConverterFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,6 +28,8 @@ public class WebExecutor {
 
     private final Map<String, String> parameters = new ConcurrentHashMap<>();
 
+    private ParameterConverterFactory parameterConverterFactory = new ParameterConverterFactory();
+
     public WebExecutor(String controllerName, String controllerPath, String methodPath, Method method, MethodType methodType) {
         this.controllerName = controllerName;
         this.controllerPath = controllerPath;
@@ -33,6 +37,7 @@ public class WebExecutor {
         this.method = method;
         this.methodType = methodType;
         initializeParameters();
+        parameterConverterFactory.initConverters();
     }
 
     public Object invoke() {
@@ -66,24 +71,8 @@ public class WebExecutor {
     }
 
     private Object covertParameterType(Parameter parameter, String parameterValue) {
-        switch (parameter.getParameterizedType().getTypeName()) {
-            case "java.lang.String":
-                return parameterValue;
-            case "Long":
-                return "".equals(parameterValue) ? null : Long.parseLong(parameterValue);
-            case "long":
-                return "".equals(parameterValue) ? 0L : Long.parseLong(parameterValue);
-            case "int":
-                return "".equals(parameterValue) ? 0 : Integer.parseInt(parameterValue);
-            case "Integer":
-                return "".equals(parameterValue) ? null : Integer.parseInt(parameterValue);
-            case "double":
-                return "".equals(parameterValue) ? 0d : Double.parseDouble(parameterValue);
-            case "Double":
-                return "".equals(parameterValue) ? null : Double.parseDouble(parameterValue);
-            default:
-                throw new IllegalArgumentException();
-        }
+        ParameterConverter converter = parameterConverterFactory.getConverter(parameter);
+        return converter.convert(parameterValue);
     }
 
 
