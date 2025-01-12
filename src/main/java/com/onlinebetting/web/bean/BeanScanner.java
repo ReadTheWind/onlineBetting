@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class BeanScanner {
 
-    public static Set<String> scanServiceBean(String rootPackage) {
+    public static Set<String> scanServiceBeanClassNames(String rootPackage) {
         try {
             return getAnnotatedClasses(rootPackage, Service.class);
         } catch (URISyntaxException | ClassNotFoundException e) {
@@ -23,7 +23,7 @@ public class BeanScanner {
         }
     }
 
-    public static Set<String> scanControllerBean(String packageName) {
+    public static Set<String> scanControllerBeanClassNames(String packageName) {
         try {
             return getAnnotatedClasses(packageName, WebController.class);
         } catch (URISyntaxException | ClassNotFoundException e) {
@@ -61,21 +61,21 @@ public class BeanScanner {
     private static Set<String> getAnnotatedClasses(String packageName, Class<?>... annotations) throws URISyntaxException, ClassNotFoundException {
 
         File folder = new File(getResourceURL(packageName).toURI());
-        Set<String> beanNames = new HashSet<>();
+        Set<String> classNames = new HashSet<>();
         for (File file : folder.listFiles()) {
 
             if (isClassFile(file)) {
                 String className = packageName + WebConstant.DOT + file.getName().substring(0, file.getName().lastIndexOf(WebConstant.DOT));
                 Class<?> clazz = Class.forName(className);
                 if (isClassAnnotated(clazz, annotations)) {
-                    beanNames.add(className);
+                    classNames.add(className);
                 }
             } else if (file.isDirectory()) {
                 String subordinatePackageName = packageName + "." + file.getName();
-                beanNames.addAll(getAnnotatedClasses(subordinatePackageName, annotations));
+                classNames.addAll(getAnnotatedClasses(subordinatePackageName, annotations));
             }
         }
-        return beanNames;
+        return classNames;
     }
 
     private static URL getResourceURL(String packageName) {

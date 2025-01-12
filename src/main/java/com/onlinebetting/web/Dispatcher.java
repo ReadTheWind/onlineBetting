@@ -6,7 +6,7 @@ import com.onlinebetting.web.bean.BeanScanner;
 import com.onlinebetting.web.bean.WebExecutor;
 import com.onlinebetting.web.constants.WebConstant;
 import com.onlinebetting.web.enums.MethodType;
-import com.onlinebetting.web.exception.PathMatchExecutorException;
+import com.onlinebetting.web.exception.PathMatchExecutorFailException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -69,7 +69,7 @@ public class Dispatcher {
 
         WebExecutor executor = findWebExecutorByRequestPath(requestPath, methodType);
 
-        if (null == executor) throw new PathMatchExecutorException();
+        if (null == executor) throw new PathMatchExecutorFailException();
 
         processPathParameters(requestPath, executor);
 

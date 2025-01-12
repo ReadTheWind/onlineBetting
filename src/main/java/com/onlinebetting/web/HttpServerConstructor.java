@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -33,8 +32,8 @@ public final class HttpServerConstructor {
             URL url = Thread.currentThread().getContextClassLoader().getResource(WebConstant.RESOURCE_FILE_NAME);
             prop.load(Files.newInputStream(Paths.get(url.toURI())));
             return Integer.parseInt((String) prop.get(WebConstant.SERVER_PORT_KEY));
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException("Read property file error...");
+        } catch (Exception e) {
+            throw new RuntimeException("Read property file error...", e);
         }
     }
 }

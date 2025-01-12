@@ -2,7 +2,7 @@ package com.onlinebetting.web;
 
 import com.onlinebetting.web.constants.WebConstant;
 import com.onlinebetting.web.enums.MethodType;
-import com.onlinebetting.web.exception.PathMatchExecutorException;
+import com.onlinebetting.web.exception.PathMatchExecutorFailException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -31,7 +31,7 @@ public class WebHttpHandler implements HttpHandler {
 
             exchange.sendResponseHeaders(WebConstant.SUCCESS_HTTP_STATUS_CODE, WebConstant.INT_ZERO);
             httpResponse.write((null == response ? WebConstant.EMPTY_STRING : response.toString()).getBytes());
-        } catch (PathMatchExecutorException e) {
+        } catch (PathMatchExecutorFailException e) {
             e.printStackTrace();
 
             exchange.sendResponseHeaders(WebConstant.PATH_NOT_FOUND_HTTP_STATUS_CODE, WebConstant.INT_ZERO);

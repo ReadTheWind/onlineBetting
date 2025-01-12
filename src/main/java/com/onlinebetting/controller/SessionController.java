@@ -11,7 +11,7 @@ import com.onlinebetting.web.enums.MethodType;
 public class SessionController {
 
 
-    @Autowired(name = "sessionService")
+    @Autowired
     public SessionService sessionService;
 
     @RequestMapping(path = "/{customerId}/session", method = MethodType.GET)

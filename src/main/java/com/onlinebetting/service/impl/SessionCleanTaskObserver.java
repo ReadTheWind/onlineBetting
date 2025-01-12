@@ -13,14 +13,14 @@ import java.util.concurrent.TimeUnit;
 @Service(name = "sessionCleanTaskObserver")
 public class SessionCleanTaskObserver implements Observer {
 
-    @Autowired(name = "sessionService")
+    @Autowired
     private SessionService sessionService;
 
     @Override
     public void update(Observable o, Object arg) {
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutorService.scheduleAtFixedRate(() -> sessionService.cleanUpInvalidSession(), 1, 1, TimeUnit.MINUTES);
-        System.out.println("remove  expired session task started！");
+        System.out.println("clean expired session task started！");
     }
 
 

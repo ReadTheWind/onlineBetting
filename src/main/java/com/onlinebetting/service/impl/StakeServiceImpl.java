@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service(name = "sessionServiceImpl")
 public class StakeServiceImpl implements StakeService {
 
-    @Autowired(name = "sessionService")
+    @Autowired
     private SessionService sessionService;
 
     private final Map<Long, BetOffer> betOffers = new ConcurrentHashMap<>();
