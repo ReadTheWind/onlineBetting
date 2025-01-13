@@ -1,8 +1,9 @@
 package com.onlinebetting.web.constants;
 
 public class WebConstant {
-    public static final String RESOURCE_FILE_NAME = "application.properties";
-    public static final String SERVER_PORT_KEY = "server.port";
+
+    public static final int SERVER_PORT = 8001;
+
     public static final String CLASS_SUFFIX = ".class";
 
 

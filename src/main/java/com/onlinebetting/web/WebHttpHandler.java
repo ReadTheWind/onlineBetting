@@ -35,7 +35,7 @@ public class WebHttpHandler implements HttpHandler {
             e.printStackTrace();
 
             exchange.sendResponseHeaders(WebConstant.PATH_NOT_FOUND_HTTP_STATUS_CODE, WebConstant.INT_ZERO);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
 
             exchange.sendResponseHeaders(WebConstant.ERROR_HTTP_STATUS_CODE, WebConstant.INT_ZERO);

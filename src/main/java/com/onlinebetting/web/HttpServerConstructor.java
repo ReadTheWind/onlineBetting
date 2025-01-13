@@ -1,17 +1,16 @@
 package com.onlinebetting.web;
 
+import com.onlinebetting.web.constants.WebConstant;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Properties;
 import java.util.concurrent.Executor;
 
 public final class HttpServerConstructor {
 
-    private HttpServer httpServer;
-    private final Properties prop = new Properties();
+    private final HttpServer httpServer;
 
     public HttpServerConstructor(Executor executor) throws IOException {
         this.httpServer = HttpServer.create(new InetSocketAddress(getHttpPort()), 0);
@@ -24,6 +23,6 @@ public final class HttpServerConstructor {
     }
 
     private int getHttpPort() {
-        return 8001;
+        return WebConstant.SERVER_PORT;
     }
 }

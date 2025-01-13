@@ -79,7 +79,7 @@ public class Dispatcher {
     }
 
     private WebExecutor findWebExecutorByRequestPath(String realPath, MethodType methodType) {
-        Optional<Map.Entry<String, WebExecutor>> matchExecutor = executors.entrySet().stream().filter(i -> this.isMatch(i, realPath, methodType)).findFirst();
+        Optional<Map.Entry<String, WebExecutor>> matchExecutor = executors.entrySet().stream().filter(i -> this.isPathMatch(i, realPath, methodType)).findFirst();
         return matchExecutor.map(Map.Entry::getValue).orElse(null);
     }
 
@@ -142,7 +142,7 @@ public class Dispatcher {
         }
     }
 
-    private boolean isMatch(Map.Entry<String, WebExecutor> entry, String realPath, MethodType methodType) {
+    private boolean isPathMatch(Map.Entry<String, WebExecutor> entry, String realPath, MethodType methodType) {
 
         boolean isMatch = Boolean.TRUE;
 
