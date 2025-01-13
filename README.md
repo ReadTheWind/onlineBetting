@@ -10,3 +10,7 @@
 ## bet offer's stakes
 - Use the jump table structure to store top 20 bets, and only the highest stake per betting offer counts for a specific customer.
 - Use concurrent containers for thread safety.
+
+## web
+- Use com.sun.net.httpserver.HttpServer for the http server.
+- Drawing inspiration from Spring MVC in programming philosophy.
