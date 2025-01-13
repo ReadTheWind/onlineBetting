@@ -1,14 +1,10 @@
 package com.onlinebetting.web;
 
-import com.onlinebetting.web.constants.WebConstant;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
@@ -28,12 +24,6 @@ public final class HttpServerConstructor {
     }
 
     private int getHttpPort() {
-        try {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(WebConstant.RESOURCE_FILE_NAME);
-            prop.load(Files.newInputStream(Paths.get(url.toURI())));
-            return Integer.parseInt((String) prop.get(WebConstant.SERVER_PORT_KEY));
-        } catch (Exception e) {
-            throw new RuntimeException("Read property file error...", e);
-        }
+        return 8001;
     }
 }

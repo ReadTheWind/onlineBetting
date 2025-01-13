@@ -26,4 +26,8 @@ public class WebConstant {
     public static final double DOUBLE_ZERO = 0d;
     public static final long LONG_ZERO = 0L;
 
+    public static final String UTF_8 = "UTF-8";
+    public static final String JAR = "jar";
+    public static final String FILE = "file";
+
 }
